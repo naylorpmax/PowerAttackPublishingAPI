@@ -1,3 +1,3 @@
-# homebrew-users-api
+# PowerAttackPublishingAPI
 
 API to discover Homebrew D&D content for Patreon users of Power Attack Publishing.
