@@ -1,6 +1,6 @@
 package api
 
-import(
+import (
 	"net/http"
 )
 
@@ -21,38 +21,38 @@ const (
 type (
 	Route struct {
 		Method string
-		Path string
+		Path   string
 	}
 )
 
 var (
 	HealthRoute = Route{
 		Method: http.MethodGet,
-		Path: HealthEndpoint,
+		Path:   HealthEndpoint,
 	}
 
 	HomeRoute = Route{
 		Method: http.MethodGet,
-		Path: HomeEndpoint,
+		Path:   HomeEndpoint,
 	}
 
 	LoginRoute = Route{
 		Method: http.MethodGet,
-		Path: LoginEndpoint,
+		Path:   LoginEndpoint,
 	}
 
 	WelcomeRoute = Route{
 		Method: http.MethodGet,
-		Path: WelcomeEndpoint,
+		Path:   WelcomeEndpoint,
 	}
 
 	MonsterLookupRoute = Route{
 		Method: http.MethodPost,
-		Path: MonsterLookupEndpoint,
+		Path:   MonsterLookupEndpoint,
 	}
 
 	SpellLookupRoute = Route{
 		Method: http.MethodPost,
-		Path: SpellLookupEndpoint,
+		Path:   SpellLookupEndpoint,
 	}
 )

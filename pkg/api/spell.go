@@ -22,8 +22,8 @@ type (
 func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
 		return &middleware.Error{
-			Message:       "unsupported media type",
-			Details: fmt.Sprintf("expected 'application/json', got '%v'", contentType),
+			Message:    "unsupported media type",
+			Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
 			StatusCode: http.StatusBadRequest,
 		}
 	}
@@ -35,8 +35,8 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 
 	if err := decoder.Decode(spellReq); err != nil {
 		return &middleware.Error{
-			Message: "unable to unmarshal request",
-			Details: err.Error(),
+			Message:    "unable to unmarshal request",
+			Details:    err.Error(),
 			StatusCode: http.StatusBadRequest,
 		}
 	}

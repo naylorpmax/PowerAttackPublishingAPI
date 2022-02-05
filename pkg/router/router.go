@@ -6,17 +6,17 @@ import (
 
 	"github.com/naylorpmax/homebrew-users-api/pkg/api"
 	"github.com/naylorpmax/homebrew-users-api/pkg/middleware"
-	"github.com/naylorpmax/homebrew-users-api/pkg/spell"
 	"github.com/naylorpmax/homebrew-users-api/pkg/monster"
+	"github.com/naylorpmax/homebrew-users-api/pkg/spell"
 )
 
 type (
-	Config struct{
+	Config struct {
 		// dbClient *db.Client
 		OAuth2Config *oauth2.Config
 		// Logger logger.Logger
 		MonsterService *monster.Service
-		SpellService *spell.Service
+		SpellService   *spell.Service
 	}
 )
 

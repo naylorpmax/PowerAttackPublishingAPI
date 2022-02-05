@@ -22,8 +22,8 @@ type (
 func (m *MonsterLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
 		return &middleware.Error{
-			Message:       "unsupported media type",
-			Details: fmt.Sprintf("expected 'application/json', got '%v'", contentType),
+			Message:    "unsupported media type",
+			Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
 			StatusCode: http.StatusBadRequest,
 		}
 	}
@@ -32,11 +32,11 @@ func (m *MonsterLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	
+
 	if err := decoder.Decode(monsterReq); err != nil {
 		return &middleware.Error{
-			Message: "unable to unmarshal request",
-			Details: err.Error(),
+			Message:    "unable to unmarshal request",
+			Details:    err.Error(),
 			StatusCode: http.StatusBadRequest,
 		}
 	}

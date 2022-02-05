@@ -1,7 +1,7 @@
 package monster
 
 type (
-	Service struct{
+	Service struct {
 		// DBClient *db.Client
 	}
 

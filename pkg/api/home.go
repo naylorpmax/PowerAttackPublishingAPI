@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	Home struct{
+	Home struct {
 	}
 )
 

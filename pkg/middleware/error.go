@@ -10,9 +10,9 @@ type (
 	Middleware func(http.ResponseWriter, *http.Request) error
 
 	Error struct {
-		StatusCode   int `json:"-"`
-		Message       string `json:"message"`
-		Details string `json:"details"`
+		StatusCode int    `json:"-"`
+		Message    string `json:"message"`
+		Details    string `json:"details"`
 	}
 )
 

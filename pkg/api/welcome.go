@@ -1,6 +1,6 @@
 package api
 
-import(
+import (
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,7 +11,7 @@ import(
 )
 
 type (
-	Welcome struct{
+	Welcome struct {
 		OAuth2Config *oauth2.Config
 	}
 )
@@ -33,7 +33,7 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 	welcomeMsg := map[string]string{
 		"message": "welcome! you're logged in",
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(welcomeMsg)
