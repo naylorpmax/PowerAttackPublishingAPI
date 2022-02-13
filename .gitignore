@@ -1,0 +1,6 @@
+pkg/api/user.go
+pkg/middleware/monitoring.go
+pkg/query
+
+# VSCode
+*.code-workspace

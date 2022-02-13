@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  homebrew-db:
+    container_name: homebrew-db
+    image: "postgres:14.1"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_HOST: $POSTGRES_HOST
+    networks:
+      - local
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  homebrew-write:
+    container_name: homebrew-write
+    image: homebrew-py:0.0.1
+    command: "python -u db.py"
+    environment:
+      DATA_PATH: $DATA_PATH
+      TABLE_NAME: $TABLE_NAME
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  homebrew-api:
+    container_name: homebrew-api
+    image: "golang:1.16"
+    # ports:
+    #   - "8080:8080"
+    networks:
+      - local
+    build:
+      context: .
+      dockerfile: go.dockerfile
+    depends_on:
+      homebrew-db:
+        condition: service_started
+    environment:
+      PATREON_CLIENT_ID: $PATREON_CLIENT_ID
+      PATREON_CLIENT_SECRET: $PATREON_CLIENT_SECRET
+
+networks:
+  local:
