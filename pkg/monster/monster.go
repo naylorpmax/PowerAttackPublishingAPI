@@ -1,8 +1,10 @@
 package monster
 
+import "github.com/jackc/pgx/v4"
+
 type (
 	Service struct {
-		// DBClient *db.Client
+		DBConn *pgx.Conn
 	}
 
 	Object struct {

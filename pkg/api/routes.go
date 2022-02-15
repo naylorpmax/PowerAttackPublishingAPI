@@ -7,7 +7,7 @@ import (
 const (
 	HealthEndpoint = "/health"
 
-	HomeEndpoint = "/home"
+	HomeEndpoint = "/"
 
 	LoginEndpoint = "/login"
 

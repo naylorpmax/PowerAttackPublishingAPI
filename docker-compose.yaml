@@ -24,6 +24,9 @@ services:
     environment:
       DATA_PATH: $DATA_PATH
       TABLE_NAME: $TABLE_NAME
+      POSTGRES_PASSWORD: POSTGRES_PASSWORD
+    networks:
+      - local
     volumes:
       - .:/app
     working_dir: /app
@@ -44,6 +47,7 @@ services:
     environment:
       PATREON_CLIENT_ID: $PATREON_CLIENT_ID
       PATREON_CLIENT_SECRET: $PATREON_CLIENT_SECRET
+      DB_URL: $DB_URL
 
 networks:
   local:

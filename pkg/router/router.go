@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4"
 	"golang.org/x/oauth2"
 
 	"github.com/naylorpmax/homebrew-users-api/pkg/api"
@@ -12,7 +13,7 @@ import (
 
 type (
 	Config struct {
-		// dbClient *db.Client
+		dbConn       *pgx.Conn
 		OAuth2Config *oauth2.Config
 		// Logger logger.Logger
 		MonsterService *monster.Service
