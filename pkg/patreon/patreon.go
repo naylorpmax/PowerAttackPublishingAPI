@@ -3,15 +3,13 @@ package patreon
 import (
 	"errors"
 	"fmt"
-	"net/http"
 
-	"golang.org/x/oauth2"
-	mxpv "gopkg.in/mxpv/patreon-go.v1"
+	pat "github.com/naylorpmax/homebrew-users-api/pkg/client/patreon"
 )
 
 type (
 	Patreon struct {
-		client *mxpv.Client
+		Client pat.Client
 	}
 )
 
@@ -21,76 +19,58 @@ const (
 	MinUserAmountCents = 500
 )
 
-// TODO: create interface + tests + consider making type to wrap mxpv user + pledge responses
-
-func New(r *http.Request, oauth2Config *oauth2.Config) (*Patreon, error) {
-	code := r.FormValue("code")
-	if code == "" {
-		return nil, errors.New("redirect request does not contain OAuth2 code")
-	}
-
-	tok, err := oauth2Config.Exchange(r.Context(), code)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create Patreon client: %v", err.Error())
-	}
-
-	client := oauth2Config.Client(r.Context(), tok)
-	return &Patreon{client: mxpv.NewClient(client)}, nil
+func New(client pat.Client) (*Patreon, error) {
+	return &Patreon{Client: client}, nil
 }
 
 func (p *Patreon) AuthenticateUser() (string, error) {
-	user, err := p.client.FetchUser()
+	user, err := p.Client.FetchUser()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to fetch user: %v", err)
 	}
 
 	// hello creator!
-	if p.getUserID(user) == CreatorUserID {
-		return p.getUserFirstLastName(user), nil
+	if user.ID == CreatorUserID {
+		return user.FirstName + " " + user.LastName, nil
 	}
 
 	// hello patron!
-	pledges, err := p.client.FetchPledges(CampaignID)
+	pledges, err := p.Client.FetchPledges(CampaignID)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to fetch user's pledges: %v", err)
 	}
-	if pledgeAmount := p.getPledgeAmount(pledges); pledgeAmount < MinUserAmountCents {
+	if pledgeAmount := getPledgeAmount(pledges); pledgeAmount < MinUserAmountCents {
 		return "", errors.New("patron level not high enough to access content")
 	}
-	if err = p.goodStanding(user, pledges); err != nil {
+	if err = goodStanding(user, pledges); err != nil {
 		return "", fmt.Errorf("user is not in good standing with this campaign: %v", err.Error())
 	}
-	return p.getUserFirstLastName(user), nil
+	return user.FirstName + " " + user.LastName, nil
 }
 
-func (p *Patreon) getUserID(user *mxpv.UserResponse) string {
-	return user.Data.ID
-}
-
-func (p *Patreon) getUserFirstLastName(user *mxpv.UserResponse) string {
-	return user.Data.Attributes.FirstName + " " + user.Data.Attributes.LastName
-}
-
-func (p *Patreon) getPledgeAmount(pledges *mxpv.PledgeResponse) int {
+func getPledgeAmount(pledges []*pat.Pledge) int {
 	totalAmount := 0
-	for _, pledge := range pledges.Data {
-		totalAmount += pledge.Attributes.AmountCents
+	for _, pledge := range pledges {
+		totalAmount += pledge.AmountCents
 	}
 	return totalAmount
 }
 
-func (p *Patreon) goodStanding(user *mxpv.UserResponse, pledges *mxpv.PledgeResponse) error {
-	if user.Data.Attributes.IsSuspended {
+func goodStanding(user *pat.User, pledges []*pat.Pledge) error {
+	if user.IsSuspended {
 		return errors.New("user is suspended")
 	}
-	if user.Data.Attributes.IsDeleted {
+	if user.IsDeleted {
 		return errors.New("user is deleted")
 	}
-	for _, pledge := range pledges.Data {
-		if !pledge.Attributes.PatronPaysFees {
+	if user.IsNuked {
+		return errors.New("user is nuked")
+	}
+	for _, pledge := range pledges {
+		if !pledge.PatronPaysFees {
 			return errors.New("user has unpaid fees")
 		}
-		if *pledge.Attributes.IsPaused {
+		if pledge.IsPaused != nil && *pledge.IsPaused {
 			return errors.New("user is paused")
 		}
 	}
