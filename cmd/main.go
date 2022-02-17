@@ -31,7 +31,6 @@ func main() {
 		fmt.Println("missing required environment variable: $DB_URL")
 		os.Exit(1)
 	}
-	fmt.Println(dbURL)
 
 	oauth2Config := &oauth2.Config{
 		ClientID:     patreonClientID,
@@ -58,6 +57,7 @@ func main() {
 	select {
 	case <-ctx.Done():
 		fmt.Println("context cancelled before connecting to the database: ", ctx.Err().Error())
+		os.Exit(1)
 	default:
 	}
 

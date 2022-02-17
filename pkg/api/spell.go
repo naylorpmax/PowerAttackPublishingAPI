@@ -50,7 +50,11 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 
 	spells, err := s.SpellService.Lookup(r.Context(), *spellReq.Name)
 	if err != nil {
-		return fmt.Errorf("unable to lookup spell: %v", err)
+		return &middleware.Error{
+			Message:    "unable to lookup spell",
+			StatusCode: http.StatusInternalServerError,
+			Details:    err.Error(),
+		}
 	}
 
 	results := map[string][]*spell.Object{
