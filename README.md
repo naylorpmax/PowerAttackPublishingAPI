@@ -29,9 +29,14 @@ make api
 
 **Make requests**
 
-- Navigate to localhost:8080/login in browser
+- Navigate to `http://localhost:8080/` in browser
+- Navigate to `http://localhost:8080/login` in browser
 - Login to Patreon
+- Make scripted requests for spells to the API
 
+```
+./scripts/sample-requests.sh
+```
 
 **Locally explore data**
 

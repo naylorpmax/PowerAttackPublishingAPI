@@ -11,7 +11,8 @@ import (
 
 type (
 	SpellRequest struct {
-		Name *string
+		Name  *string `json:"name"`
+		Level *string `json:"level"`
 	}
 
 	SpellLookup struct {
@@ -41,14 +42,14 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	if spellReq.Name == nil || *spellReq.Name == "" {
+	if spellReq.Name == nil && spellReq.Level == nil {
 		return &middleware.Error{
-			Message:    "missing required body element 'name'",
+			Message:    "request has no non-empty body properties",
 			StatusCode: http.StatusBadRequest,
 		}
 	}
 
-	spells, err := s.SpellService.Lookup(r.Context(), *spellReq.Name)
+	spells, err := s.SpellService.Lookup(r.Context(), spellReq.Name, spellReq.Level)
 	if err != nil {
 		return &middleware.Error{
 			Message:    "unable to lookup spell",
