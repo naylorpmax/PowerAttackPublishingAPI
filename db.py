@@ -11,10 +11,10 @@ class DB:
 
 	@classmethod
 	def from_env(cls):
-		host = os.environ.get("POSTGRES_HOST", "homebrew-db")
+		host = os.environ.get("POSTGRES_HOST", "postgres")
 		port = os.environ.get("POSTGRES_PORT", "5432")
-		database = os.environ.get("POSTGRES_DB", "homebrew")
-		user = os.environ.get("POSTGRES_USER", "max")
+		database = os.environ.get("POSTGRES_DB", "postgres")
+		user = os.environ.get("POSTGRES_USER", "postgres")
 		password = os.environ["POSTGRES_PASSWORD"]
 		return cls(host, port, database, user, password)
 

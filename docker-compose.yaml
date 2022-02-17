@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  homebrew-db:
-    container_name: homebrew-db
+  postgres:
+    container_name: postgres
     image: "postgres:14.1"
     ports:
       - "5432:5432"
@@ -34,15 +34,15 @@ services:
   homebrew-api:
     container_name: homebrew-api
     image: "golang:1.16"
-    # ports:
-    #   - "8080:8080"
+    ports:
+      - "8080:8080"
     networks:
       - local
     build:
       context: .
       dockerfile: go.dockerfile
     depends_on:
-      homebrew-db:
+      postgres:
         condition: service_started
     environment:
       PATREON_CLIENT_ID: $PATREON_CLIENT_ID

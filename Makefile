@@ -7,24 +7,24 @@ DB_URL:="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:543
 
 .PHONY: build-image
 build-image:	## build docker image
-	docker build -t ${IMAGE_NAME}:${IMAGE_VERSION} .
+	docker build -t ${IMAGE_NAME}:${IMAGE_VERSION} -f py.dockerfile .
 
 .PHONY: db
 db:	## create database
-	docker rm -f /homebrew-db || true
-	docker-compose up -d homebrew-db
+	docker rm -f /postgres || true
+	docker-compose up -d postgres
 
 .PHONY: db-init
 db-init: db
 	sleep 5 && docker exec -it \
-		homebrew-db \
+		postgres \
 		psql ${DB_URL} \
 		-f /app/sql/db-init.sql
 
 .PHONY: db-conn
 db-conn: ## connect to database
 	docker exec -it \
-		homebrew-db \
+		postgres \
 		psql ${DB_URL}
 
 .PHONY: db-write
@@ -43,13 +43,14 @@ build:
 		--no-cache
 
 .PHONY: api
-api: ## build
+api: build
 	docker rm -f "/homebrew-api" || true
 	docker run -d --name ${APP_NAME} \
 		--entrypoint "/app/homebrew-api" \
-		--network=local \
+		--network=powerattackpublishingapi_local \
 		-p 8080:8080 \
 		-e PATREON_CLIENT_ID="${PATREON_CLIENT_ID}" \
 		-e PATREON_CLIENT_SECRET="${PATREON_CLIENT_SECRET}" \
 		-e DB_URL=${DB_URL} \
 		${APP_NAME}:${APP_VER}
+	docker logs ${APP_NAME} -f

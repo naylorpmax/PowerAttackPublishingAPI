@@ -25,9 +25,13 @@ make db-write
 
 ```bash
 make api
-# navigate to localhost:8080/login in browser
-# login
 ```
+
+**Make requests**
+
+- Navigate to localhost:8080/login in browser
+- Login to Patreon
+
 
 **Locally explore data**
 
