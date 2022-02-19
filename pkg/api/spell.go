@@ -21,51 +21,65 @@ type (
 )
 
 func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
-	if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
-		return &apierror.Error{
-			Message:    "unsupported media type",
-			Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
-			StatusCode: http.StatusBadRequest,
+	errCh := make(chan error)
+
+	go func() {
+		if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
+			errCh <- &apierror.Error{
+				Message:    "unsupported media type",
+				Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
+				StatusCode: http.StatusBadRequest,
+			}
+			return
 		}
-	}
 
-	spellReq := &SpellRequest{}
+		spellReq := &SpellRequest{}
 
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(spellReq); err != nil {
-		return &apierror.Error{
-			Message:    "unable to unmarshal request",
-			Details:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+		if err := decoder.Decode(spellReq); err != nil {
+			errCh <- &apierror.Error{
+				Message:    "unable to unmarshal request",
+				Details:    err.Error(),
+				StatusCode: http.StatusBadRequest,
+			}
+			return
 		}
-	}
 
-	if spellReq.Name == nil && spellReq.Level == nil {
-		return &apierror.Error{
-			Message:    "request has no non-empty body properties",
-			StatusCode: http.StatusBadRequest,
+		if spellReq.Name == nil && spellReq.Level == nil {
+			errCh <- &apierror.Error{
+				Message:    "request has no non-empty body properties",
+				StatusCode: http.StatusBadRequest,
+			}
+			return
 		}
-	}
 
-	spells, err := s.SpellService.Lookup(r.Context(), spellReq.Name, spellReq.Level)
-	if err != nil {
-		return &apierror.Error{
-			Message:    "unable to lookup spell",
-			StatusCode: http.StatusInternalServerError,
-			Details:    err.Error(),
+		spells, err := s.SpellService.Lookup(r.Context(), spellReq.Name, spellReq.Level)
+		if err != nil {
+			errCh <- &apierror.Error{
+				Message:    "unable to lookup spell",
+				StatusCode: http.StatusInternalServerError,
+				Details:    err.Error(),
+			}
+			return
 		}
-	}
 
-	results := map[string][]*spell.Object{
-		"spells": spells,
-	}
+		results := map[string][]*spell.Object{
+			"spells": spells,
+		}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(results)
-	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(results)
+		if err != nil {
+			errCh <- err
+			return
+		}
+		errCh <- nil
+	}()
+
+	if err := <-errCh; err != nil {
 		return err
 	}
 	return nil

@@ -25,18 +25,17 @@ func (fn Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errResp, ok := err.(*Error)
 		if !ok {
-			// TODO: add default error response
-			fmt.Println(err)
-			return
+			errResp = &Error{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "unexpected internal server error",
+				Details:    err.Error(),
+			}
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errResp.StatusCode)
 
-		body, err := json.Marshal(errResp)
-		if err != nil {
-			fmt.Println(err)
-		}
+		body, _ := json.Marshal(errResp)
 		w.Write(body)
 	}
 }

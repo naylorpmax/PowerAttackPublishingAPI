@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -18,12 +17,9 @@ import (
 
 func main() {
 	mainLogger, _ := zap.NewProduction()
-	defer func() {
-		mainLogger.Sync()
-		fmt.Println("syncing")
-	}()
+	defer mainLogger.Sync()
 
-	mainLogger.Info("starting application")
+	mainLogger.Info("application starting up")
 
 	patreonClientID := os.Getenv("PATREON_CLIENT_ID")
 	if patreonClientID == "" {
@@ -91,10 +87,9 @@ func main() {
 		Handler: router.New(routerCfg),
 	}
 
-	fmt.Println("listening on :8080")
+	mainLogger.Info("application started successfully", zap.String("host", server.Addr))
 	err = server.ListenAndServe()
 	if err != nil {
-		fmt.Println("shutting down server: ", err.Error())
-		os.Exit(1)
+		mainLogger.Error("shutting down server", zap.String("error", err.Error()))
 	}
 }
