@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v4"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 
 	"github.com/naylorpmax/homebrew-users-api/pkg/monster"
@@ -16,20 +17,33 @@ import (
 )
 
 func main() {
+	mainLogger, _ := zap.NewProduction()
+	defer func() {
+		mainLogger.Sync()
+		fmt.Println("syncing")
+	}()
+
+	mainLogger.Info("starting application")
+
 	patreonClientID := os.Getenv("PATREON_CLIENT_ID")
 	if patreonClientID == "" {
-		fmt.Println("missing required environment variable: $PATREON_CLIENT_ID")
+		mainLogger.Fatal("missing required environment variable",
+			zap.String("environment_variable", "PATREON_CLIENT_ID"),
+		)
 	}
 
 	patreonClientSecret := os.Getenv("PATREON_CLIENT_SECRET")
 	if patreonClientID == "" {
-		fmt.Println("missing required environment variable: $PATREON_CLIENT_SECRET")
+		mainLogger.Fatal("missing required environment variable",
+			zap.String("environment_variable", "PATREON_CLIENT_SECRET"),
+		)
 	}
 
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
-		fmt.Println("missing required environment variable: $DB_URL")
-		os.Exit(1)
+		mainLogger.Fatal("missing required environment variable",
+			zap.String("environment_variable", "DB_URL"),
+		)
 	}
 
 	oauth2Config := &oauth2.Config{
@@ -42,22 +56,22 @@ func main() {
 		},
 	}
 
-	// TODO: initialize logger
-
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	conn, err := pgx.Connect(ctx, dbURL)
 	if err != nil {
-		fmt.Println("unable to connect to database: ", err.Error())
-		os.Exit(1)
+		mainLogger.Fatal("unable to connect to database",
+			zap.String("error", err.Error()),
+		)
 	}
 	defer conn.Close(ctx)
 
 	select {
 	case <-ctx.Done():
-		fmt.Println("context cancelled before connecting to the database: ", ctx.Err().Error())
-		os.Exit(1)
+		mainLogger.Fatal("context cancelled before connecting to the database",
+			zap.String("error", ctx.Err().Error()),
+		)
 	default:
 	}
 
@@ -69,6 +83,7 @@ func main() {
 			DBConn: conn,
 		},
 		OAuth2Config: oauth2Config,
+		Logger:       *mainLogger,
 	}
 
 	server := http.Server{

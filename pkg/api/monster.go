@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/naylorpmax/homebrew-users-api/pkg/middleware"
+	"github.com/naylorpmax/homebrew-users-api/pkg/middleware/apierror"
 	"github.com/naylorpmax/homebrew-users-api/pkg/monster"
 )
 
@@ -21,7 +21,7 @@ type (
 
 func (m *MonsterLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
-		return &middleware.Error{
+		return &apierror.Error{
 			Message:    "unsupported media type",
 			Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
 			StatusCode: http.StatusBadRequest,
@@ -34,7 +34,7 @@ func (m *MonsterLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(monsterReq); err != nil {
-		return &middleware.Error{
+		return &apierror.Error{
 			Message:    "unable to unmarshal request",
 			Details:    err.Error(),
 			StatusCode: http.StatusBadRequest,

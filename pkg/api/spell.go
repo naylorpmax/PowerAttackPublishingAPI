@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/naylorpmax/homebrew-users-api/pkg/middleware"
+	"github.com/naylorpmax/homebrew-users-api/pkg/middleware/apierror"
 	"github.com/naylorpmax/homebrew-users-api/pkg/spell"
 )
 
@@ -22,7 +22,7 @@ type (
 
 func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
-		return &middleware.Error{
+		return &apierror.Error{
 			Message:    "unsupported media type",
 			Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
 			StatusCode: http.StatusBadRequest,
@@ -35,7 +35,7 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(spellReq); err != nil {
-		return &middleware.Error{
+		return &apierror.Error{
 			Message:    "unable to unmarshal request",
 			Details:    err.Error(),
 			StatusCode: http.StatusBadRequest,
@@ -43,7 +43,7 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if spellReq.Name == nil && spellReq.Level == nil {
-		return &middleware.Error{
+		return &apierror.Error{
 			Message:    "request has no non-empty body properties",
 			StatusCode: http.StatusBadRequest,
 		}
@@ -51,7 +51,7 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 
 	spells, err := s.SpellService.Lookup(r.Context(), spellReq.Name, spellReq.Level)
 	if err != nil {
-		return &middleware.Error{
+		return &apierror.Error{
 			Message:    "unable to lookup spell",
 			StatusCode: http.StatusInternalServerError,
 			Details:    err.Error(),

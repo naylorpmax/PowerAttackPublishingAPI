@@ -1,4 +1,4 @@
-package middleware
+package apierror
 
 import (
 	"encoding/json"
@@ -21,7 +21,6 @@ func (e *Error) Error() string {
 }
 
 func (fn Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("new request:", r.URL.Path)
 	err := fn(w, r)
 	if err != nil {
 		errResp, ok := err.(*Error)
@@ -40,6 +39,4 @@ func (fn Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(body)
 	}
-
-	fmt.Println("request handled:", r.URL.Path)
 }

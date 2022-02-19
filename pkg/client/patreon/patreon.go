@@ -1,9 +1,8 @@
 package patreon
 
 import (
-	"errors"
+	"context"
 	"fmt"
-	"net/http"
 
 	"golang.org/x/oauth2"
 	mxpv "gopkg.in/mxpv/patreon-go.v1"
@@ -39,18 +38,13 @@ type (
 	}
 )
 
-func New(r *http.Request, oauth2Config *oauth2.Config) (Client, error) {
-	code := r.FormValue("code")
-	if code == "" {
-		return nil, errors.New("redirect request does not contain OAuth2 code")
-	}
-
-	tok, err := oauth2Config.Exchange(r.Context(), code)
+func New(ctx context.Context, code string, oauth2Config *oauth2.Config) (Client, error) {
+	tok, err := oauth2Config.Exchange(ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create Patreon client: %v", err.Error())
 	}
 
-	client := oauth2Config.Client(r.Context(), tok)
+	client := oauth2Config.Client(ctx, tok)
 
 	return &mxpvClient{
 		client: mxpv.NewClient(client),

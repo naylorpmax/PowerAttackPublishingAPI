@@ -2,20 +2,20 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 
 	"github.com/naylorpmax/homebrew-users-api/pkg/api"
-	"github.com/naylorpmax/homebrew-users-api/pkg/middleware"
+	"github.com/naylorpmax/homebrew-users-api/pkg/middleware/apierror"
+	"github.com/naylorpmax/homebrew-users-api/pkg/middleware/monitoring"
 	"github.com/naylorpmax/homebrew-users-api/pkg/monster"
 	"github.com/naylorpmax/homebrew-users-api/pkg/spell"
 )
 
 type (
 	Config struct {
-		dbConn       *pgx.Conn
-		OAuth2Config *oauth2.Config
-		// Logger logger.Logger
+		OAuth2Config   *oauth2.Config
+		Logger         zap.Logger
 		MonsterService *monster.Service
 		SpellService   *spell.Service
 	}
@@ -23,19 +23,13 @@ type (
 
 func New(cfg Config) *mux.Router {
 	routes := mux.NewRouter().StrictSlash(true)
-
-	// routes.Use(/*middleware*/)
-	// health := &api.Health{DBClient: cfg.DBClient}
-
-	// routes.Methods(api.Health.Method).
-	// 	Path(api.Health.Path).
-	// 	Handler(health.Handler)
+	routes.Use(monitoring.Monitoring(cfg.Logger))
 
 	home := &api.Home{}
 
 	routes.Methods(api.HomeRoute.Method).
 		Path(api.HomeRoute.Path).
-		Handler(middleware.Middleware(home.Handler))
+		Handler(apierror.Middleware(home.Handler))
 
 	login := &api.Login{
 		OAuth2Config: cfg.OAuth2Config,
@@ -43,7 +37,7 @@ func New(cfg Config) *mux.Router {
 
 	routes.Methods(api.LoginRoute.Method).
 		Path(api.LoginRoute.Path).
-		Handler(middleware.Middleware(login.Handler))
+		Handler(apierror.Middleware(login.Handler))
 
 	welcome := &api.Welcome{
 		OAuth2Config: cfg.OAuth2Config,
@@ -51,7 +45,7 @@ func New(cfg Config) *mux.Router {
 
 	routes.Methods(api.WelcomeRoute.Method).
 		Path(api.WelcomeRoute.Path).
-		Handler(middleware.Middleware(welcome.Handler))
+		Handler(apierror.Middleware(welcome.Handler))
 
 	monsterLookup := &api.MonsterLookup{
 		MonsterService: cfg.MonsterService,
@@ -59,7 +53,7 @@ func New(cfg Config) *mux.Router {
 
 	routes.Methods(api.MonsterLookupRoute.Method).
 		Path(api.MonsterLookupRoute.Path).
-		Handler(middleware.Middleware(monsterLookup.Handler))
+		Handler(apierror.Middleware(monsterLookup.Handler))
 
 	spellLookup := &api.SpellLookup{
 		SpellService: cfg.SpellService,
@@ -67,7 +61,7 @@ func New(cfg Config) *mux.Router {
 
 	routes.Methods(api.SpellLookupRoute.Method).
 		Path(api.SpellLookupRoute.Path).
-		Handler(middleware.Middleware(spellLookup.Handler))
+		Handler(apierror.Middleware(spellLookup.Handler))
 
 	return routes
 }
