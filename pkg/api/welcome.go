@@ -7,9 +7,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	pat "github.com/naylorpmax/homebrew-users-api/pkg/client/patreon"
+	"github.com/naylorpmax/gopatreon"
 	"github.com/naylorpmax/homebrew-users-api/pkg/middleware/apierror"
-	"github.com/naylorpmax/homebrew-users-api/pkg/patreon"
 )
 
 type (
@@ -32,7 +31,7 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 			return
 		}
 
-		client, err := pat.New(r.Context(), code, wel.OAuth2Config)
+		client, err := gopatreon.New(r.Context(), code, wel.OAuth2Config)
 		if err != nil {
 			errCh <- &apierror.Error{
 				StatusCode: http.StatusForbidden,
@@ -42,7 +41,7 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 			return
 		}
 
-		patreonClient, err := patreon.New(client)
+		service, err := gopatreon.NewService(client)
 		if err != nil {
 			errCh <- &apierror.Error{
 				StatusCode: http.StatusInternalServerError,
@@ -52,7 +51,7 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 			return
 		}
 
-		userName, err := patreonClient.AuthenticateUser()
+		userName, err := service.AuthenticateUser()
 		if err != nil {
 			errCh <- &apierror.Error{
 				StatusCode: http.StatusForbidden,

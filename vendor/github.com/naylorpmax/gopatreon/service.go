@@ -1,15 +1,13 @@
-package patreon
+package gopatreon
 
 import (
 	"errors"
 	"fmt"
-
-	pat "github.com/naylorpmax/homebrew-users-api/pkg/client/patreon"
 )
 
 type (
-	Patreon struct {
-		Client pat.Client
+	Service struct {
+		Client Client
 	}
 )
 
@@ -19,11 +17,11 @@ const (
 	MinUserAmountCents = 500
 )
 
-func New(client pat.Client) (*Patreon, error) {
-	return &Patreon{Client: client}, nil
+func NewService(client Client) (*Service, error) {
+	return &Service{Client: client}, nil
 }
 
-func (p *Patreon) AuthenticateUser() (string, error) {
+func (p *Service) AuthenticateUser() (string, error) {
 	user, err := p.Client.FetchUser()
 	if err != nil {
 		return "", fmt.Errorf("unable to fetch user: %v", err)
@@ -48,7 +46,7 @@ func (p *Patreon) AuthenticateUser() (string, error) {
 	return user.FirstName + " " + user.LastName, nil
 }
 
-func getPledgeAmount(pledges []*pat.Pledge) int {
+func getPledgeAmount(pledges []*Pledge) int {
 	totalAmount := 0
 	for _, pledge := range pledges {
 		totalAmount += pledge.AmountCents
@@ -56,7 +54,7 @@ func getPledgeAmount(pledges []*pat.Pledge) int {
 	return totalAmount
 }
 
-func goodStanding(user *pat.User, pledges []*pat.Pledge) error {
+func goodStanding(user *User, pledges []*Pledge) error {
 	if user.IsSuspended {
 		return errors.New("user is suspended")
 	}

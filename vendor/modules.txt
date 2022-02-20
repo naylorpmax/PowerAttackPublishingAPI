@@ -1,5 +1,3 @@
-# github.com/davecgh/go-spew v1.1.1
-github.com/davecgh/go-spew/spew
 # github.com/golang/protobuf v1.4.2
 github.com/golang/protobuf/proto
 # github.com/gorilla/mux v1.8.0
@@ -25,11 +23,9 @@ github.com/jackc/pgtype
 ## explicit
 github.com/jackc/pgx/v4
 github.com/jackc/pgx/v4/internal/sanitize
-# github.com/pmezard/go-difflib v1.0.0
-github.com/pmezard/go-difflib/difflib
-# github.com/stretchr/testify v1.7.0
+# github.com/naylorpmax/gopatreon v0.0.0-20220220050006-bb912b27ec1d
 ## explicit
-github.com/stretchr/testify/assert
+github.com/naylorpmax/gopatreon
 # go.uber.org/atomic v1.6.0
 go.uber.org/atomic
 # go.uber.org/multierr v1.5.0
@@ -108,7 +104,4 @@ google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
 # gopkg.in/mxpv/patreon-go.v1 v1.0.0-20171031001022-1d2f253ac700
-## explicit
 gopkg.in/mxpv/patreon-go.v1
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
-gopkg.in/yaml.v3
