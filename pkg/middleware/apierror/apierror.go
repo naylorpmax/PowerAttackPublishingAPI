@@ -35,7 +35,12 @@ func (fn Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errResp.StatusCode)
 
-		body, _ := json.Marshal(errResp)
+		body, err := json.Marshal(errResp)
+		errResp = &Error{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "unexpected marshaling error",
+			Details:    err.Error(),
+		}
 		w.Write(body)
 	}
 }
