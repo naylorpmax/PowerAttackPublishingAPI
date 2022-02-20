@@ -23,3 +23,9 @@ curl -X POST \
 	-H "content-type: something-else" \
 	http://localhost:8080/spell/lookup \
 	-d '{"Name":"whatever"}' | python3 -m json.tool
+
+curl -X GET \
+	-H "content-type: application/json" \
+	-H "accept: application/json" \
+	http://localhost:8080/login
+
