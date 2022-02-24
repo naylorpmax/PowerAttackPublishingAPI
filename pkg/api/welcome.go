@@ -1,9 +1,9 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 
 	"golang.org/x/oauth2"
 
@@ -21,6 +21,17 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 	errCh := make(chan error)
 
 	go func() {
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			errCh <- nil
+			return
+		}
+
 		code := r.FormValue("code")
 		if code == "" {
 			errCh <- &apierror.Error{
@@ -31,7 +42,19 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 			return
 		}
 
-		client, err := gopatreon.New(r.Context(), code, wel.OAuth2Config)
+		token, err := wel.OAuth2Config.Exchange(r.Context(), code)
+		if err != nil {
+			errCh <- &apierror.Error{
+				StatusCode: http.StatusForbidden,
+				Message:    "unable to authenticate to Patreon",
+				Details:    err.Error(),
+			}
+			return
+		}
+
+		oauth2Client := wel.OAuth2Config.Client(r.Context(), token)
+
+		client, err := gopatreon.New(oauth2Client)
 		if err != nil {
 			errCh <- &apierror.Error{
 				StatusCode: http.StatusForbidden,
@@ -61,17 +84,22 @@ func (wel *Welcome) Handler(w http.ResponseWriter, r *http.Request) error {
 			return
 		}
 
-		welcomeMsg := map[string]string{
-			"message": "welcome! you're logged in",
-			"name":    userName,
+		baseURL := "http://localhost:3000/welcome"
+		v := url.Values{}
+		v.Set("name", userName)
+		redirectURL := baseURL + "?" + v.Encode()
+
+		newReq, err := http.NewRequestWithContext(r.Context(), "GET", redirectURL, nil)
+		if err != nil {
+			errCh <- &apierror.Error{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "unable to create redirect to welcome page",
+				Details:    err.Error(),
+			}
+			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(welcomeMsg)
-		if err != nil {
-			errCh <- err
-		}
+		http.Redirect(w, newReq, redirectURL, http.StatusTemporaryRedirect)
 		errCh <- nil
 	}()
 

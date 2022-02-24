@@ -36,11 +36,14 @@ func (fn Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(errResp.StatusCode)
 
 		body, err := json.Marshal(errResp)
-		errResp = &Error{
-			StatusCode: http.StatusInternalServerError,
-			Message:    "unexpected marshaling error",
-			Details:    err.Error(),
+		if err != nil {
+			errResp = &Error{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "unexpected marshaling error",
+				Details:    err.Error(),
+			}
 		}
+
 		w.Write(body)
 	}
 }
