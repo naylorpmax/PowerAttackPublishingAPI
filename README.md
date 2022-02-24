@@ -10,9 +10,9 @@ API to discover Homebrew D&D content for Patreon users of Power Attack Publishin
 **Start DB**
 
 ```bash
-export POSTGRES_HOST=homebrew-db
-export POSTGRES_DB=homebrew
-export POSTGRES_USER=max
+export POSTGRES_HOST=postgres
+export POSTGRES_DB=postgres
+export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=<postgres-password>
 make db-init
 
