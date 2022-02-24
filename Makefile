@@ -47,7 +47,7 @@ api: build
 	docker rm -f "/homebrew-api" || true
 	docker run -d --name ${APP_NAME} \
 		--entrypoint "/app/homebrew-api" \
-		--network=powerattackpublishingapi_local \
+		--network=homebrew-api_local \
 		-p 8080:8080 \
 		-e PATREON_CLIENT_ID="${PATREON_CLIENT_ID}" \
 		-e PATREON_CLIENT_SECRET="${PATREON_CLIENT_SECRET}" \

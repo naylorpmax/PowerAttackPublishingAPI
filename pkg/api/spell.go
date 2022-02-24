@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/naylorpmax/homebrew-users-api/pkg/middleware/apierror"
@@ -24,14 +23,25 @@ func (s *SpellLookup) Handler(w http.ResponseWriter, r *http.Request) error {
 	errCh := make(chan error)
 
 	go func() {
-		if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
-			errCh <- &apierror.Error{
-				Message:    "unsupported media type",
-				Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
-				StatusCode: http.StatusBadRequest,
-			}
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			errCh <- nil
 			return
 		}
+
+		// if contentType := r.Header.Get("Content-Type"); contentType != "application/json" {
+		// 	errCh <- &apierror.Error{
+		// 		Message:    "unsupported media type",
+		// 		Details:    fmt.Sprintf("expected 'application/json', got '%v'", contentType),
+		// 		StatusCode: http.StatusBadRequest,
+		// 	}
+		// 	return
+		// }
 
 		spellReq := &SpellRequest{}
 
